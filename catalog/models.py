@@ -1,6 +1,9 @@
+import uuid
+from datetime import date
 from django.db import models
 from django.urls import reverse
-import uuid
+from django.contrib.auth.models import User
+
 
 # Create your models here.
 class Genre(models.Model):
@@ -18,7 +21,8 @@ class Book(models.Model):
 	# Foreign Key used because book can only have one author, but authors can have multiple books
 	# Author as a string rather than object because it hasn't been delcared yet in the file
 	author = models.ForeignKey('Author', on_delete = models.SET_NULL, null= True)
-	
+	publisher = models.CharField(max_length = 50, null = True)
+	publication_year = models.DateField(blank = True, null = True)
 	summary = models.TextField(max_length = 1000, help_text = 'Enter a brief description of the book')
 	isbn = models.CharField('ISBN', max_length = 13, help_text = 'Select a genre for this book')
 	genre = models.ManyToManyField(Genre, help_text = 'Select a Genre for this book')
@@ -47,14 +51,7 @@ class BookInstance(models.Model):
 	imprint = models.CharField(max_length = 200)
 	due_back = models.DateField(null=True, blank = True)
 	language = models.ManyToManyField(Language, help_text = 'Select a language for this book instance')
-	
-	#LANGUAGES = (
-	#	('ENG', 'English'),
-	#	('JA', 'Japanese'),
-	#	('CHI', 'Chinese'),
-	#	('GER', 'German'),
-	#)
-	#language = models.CharField(max_length = 10, choices = LANGUAGES, blank = True, default = 'ENG', help_text = 'Language')
+	borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 	
 	LOAN_STATUS = (
 		('m', 'Maintenance'),
@@ -71,6 +68,12 @@ class BookInstance(models.Model):
 		help_text = 'Book Availability',
 	)
 	
+	@property
+	def is_overdue(self):
+		if self.due_back and date.today() > self.due_back:
+			return True
+		return False
+
 	class Meta:
 		ordering = ['due_back']
 		
@@ -96,3 +99,13 @@ class Author(models.Model):
 		return f'{self.last_name}, {self.first_name}'
 	def get_absolute_url(self):
 		return reverse('author-detail', args = [str(self.id)])
+
+class BookReview(models.Model):
+	"""Model representing the review left by a user for a certain book."""
+	user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+	book = models.ForeignKey(Book, on_delete = models.SET_NULL, null = True, blank = True)
+	content = models.TextField(max_length=500)
+
+
+	def __str__(self):
+		return f'Review by {self.user} for {self.book}'
