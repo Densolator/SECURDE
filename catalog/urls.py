@@ -19,3 +19,9 @@ urlpatterns += [
 urlpatterns += [   
     path('borrowed/', views.BookInstanceListView.as_view(), name='borrowed-books'),
 ]
+
+urlpatterns += [
+    path('author_search/', views.AuthorSearchResultsView.as_view(), name='author_search_results'),
+    path('book_search/', views.BookSearchResultsView.as_view(), name='book_search_results'),
+    # path('book_instance_search/', views.BookInstanceSearchResultsView.as_view(), name='book_instance_search_results'),
+]

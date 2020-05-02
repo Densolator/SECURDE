@@ -2,10 +2,62 @@ import uuid
 from datetime import date
 from django.db import models
 from django.urls import reverse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, BaseUserManager, AbstractBaseUser
 
+
+# class RegisteredUser(AbstractBaseUser):
+# 	email = models.EmailField(
+# 		verbose_name='email address',
+# 		max_length=255,
+# 		unique=True,
+# 	)
+# 	id_number = models.IntegerField(null=True)
+# 	active = models.BooleanField(default=True)
+# 	staff = models.BooleanField(default=False) # a admin user; non super-user
+# 	admin = models.BooleanField(default=False) # a superuser
+#     # notice thef absence of a "Password field", that is built in.
+
+# 	USERNAME_FIELD = 'email'
+# 	REQUIRED_FIELDS = ['first_name','last_name','id_number'] # Email & Password are required by default.
+
+# 	def __str__(self):              # __unicode__ on Python 2
+# 		return self.email
+
+# 	def has_perm(self, perm, obj=None):
+# 		"Does the user have a specific permission?"
+# 		# Simplest possible answer: Yes, always
+# 		return True
+
+# 	def has_module_perms(self, app_label):
+# 		"Does the user have permissions to view the app `app_label`?"
+# 		# Simplest possible answer: Yes, always
+# 		return True
+
+# 	@property
+# 	def is_staff(self):
+# 		"Is the user a member of staff?"
+# 		return self.staff
+
+# 	@property
+# 	def is_admin(self):
+# 		"Is the user a admin member?"
+# 		return self.admin
+
+# 	@property
+# 	def is_active(self):
+# 		"Is the user active?"
+# 		return self.active
 
 # Create your models here.
+class UserIDNumber(models.Model):
+	id_number = models.IntegerField(null = True, blank = True)
+	user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+	def __str__(self):
+		"""String for representing the Model object"""
+		return str(self.id_number)
+
+
 class Genre(models.Model):
 	"""Model representing a book genre."""
 	name = models.CharField(max_length=200, help_text = 'Enter a book genre(e.g. Science Fiction)')

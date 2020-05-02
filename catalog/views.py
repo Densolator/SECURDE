@@ -1,4 +1,5 @@
 import datetime
+from django.db.models import Q
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import permission_required
@@ -12,6 +13,39 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from catalog.forms import RenewBookForm
+
+class AuthorSearchResultsView(generic.ListView):
+    model = Author
+    template_name = 'catalog/author_search_results.html'
+
+    def get_queryset(self): # new
+        query = self.request.GET.get('author_query')
+        object_list = Author.objects.filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query)
+        )
+        return object_list
+
+class BookSearchResultsView(generic.ListView):
+    model = Book
+    template_name = 'catalog/book_search_results.html'
+
+    def get_queryset(self): # new
+        query = self.request.GET.get('book_query')
+        object_list = Book.objects.filter(
+            Q(title__icontains=query) | Q(summary__icontains=query)
+        )
+        return object_list
+    
+# class BookInstanceSearchResultsView(generic.ListView):
+#     model = BookInstance
+#     template_name = 'catalog/book_instance_search_results.html'
+
+#     def get_queryset(self): # new
+#         query = self.request.GET.get('book_instance_query')
+#         object_list = BookInstance.objects.filter(
+#             Q(book__icontains = query) | Q(language__icontains=query)
+#         )
+#         return object_list
 
 class BookListView(generic.ListView):
     model = Book
@@ -82,7 +116,7 @@ def renew_book_librarian(request, pk):
             book_instance.save()
 
             # redirect to a new URL:
-            return HttpResponseRedirect(reverse('all-borrowed') )
+            return HttpResponseRedirect(reverse('borrowed-books') )
 
     # If this is a GET (or any other method) create the default form.
     else:

@@ -19,6 +19,20 @@
           <li><a href="{% url 'index' %}">Home</a></li>
           <li><a href="{% url 'books' %}">All books</a></li>
           <li><a href="{% url 'authors' %}">All authors</a></li>
+          <li>Looking for a specific Author?</li>
+          <form action="{% url 'author_search_results' %}" method="get">
+            <input name="author_query" type="text" placeholder="Look up author">
+          </form>
+          <li>Looking for a specific Book?</li>
+          <form action="{% url 'book_search_results' %}" method="get">
+            <input name="book_query" type="text" placeholder="Look up book">
+          </form> 
+          {% comment %}
+            <li>Looking for a specific Book Instance?</li>
+            <form action="{% url 'book_instance_search_results' %}" method="get">
+              <input name="book_instance_query" type="text" placeholder="Look up specific book instance">
+            </form>
+          {% endcomment %}
           {% if user.is_authenticated %}
             <li>User: {{ user.get_username }}</li>
             <li><a href="{% url 'my-borrowed' %}">My Borrowed</a></li>
