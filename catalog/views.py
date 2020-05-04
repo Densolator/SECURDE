@@ -12,7 +12,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from catalog.forms import RenewBookForm
+from catalog.forms import RenewBookForm, BorrowBookForm
 
 class AuthorSearchResultsView(generic.ListView):
     model = Author
@@ -65,29 +65,21 @@ class BookInstanceListView(generic.ListView):
 def index(request):
     """View function for home page of site."""
 
-    # Generate counts of some of the main objects
     num_books = Book.objects.all().count()
     num_instances = BookInstance.objects.all().count()
     
-    # Available books (status = 'a')
     num_instances_available = BookInstance.objects.filter(status__exact='a').count()
-    
-    # The 'all()' is implied by default.    
+     
     num_authors = Author.objects.count()
 
-    # Number of visits to this view, as counted in the session variable.
-    num_visits = request.session.get('num_visits', 0)
-    request.session['num_visits'] = num_visits + 1
     
     context = {
         'num_books': num_books,
         'num_instances': num_instances,
         'num_instances_available': num_instances_available,
         'num_authors': num_authors,
-        'num_visits': num_visits,
     }
 
-    # Render the HTML template index.html with the data in the context variable
     return render(request, 'index.html', context=context)
 
 class LoanedBooksByUserListView(LoginRequiredMixin,generic.ListView):
@@ -106,19 +98,19 @@ def renew_book_librarian(request, pk):
     # If this is a POST request then process the Form data
     if request.method == 'POST':
 
-        # Create a form instance and populate it with data from the request (binding):
+        # Create a form instance and populate it with data from the request:
         form = RenewBookForm(request.POST)
 
         # Check if the form is valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
+            # process the data in form.cleaned_data as required
             book_instance.due_back = form.cleaned_data['renewal_date']
             book_instance.save()
 
             # redirect to a new URL:
             return HttpResponseRedirect(reverse('borrowed-books') )
 
-    # If this is a GET (or any other method) create the default form.
+    # If this is a GET method, create the default form.
     else:
         proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
         form = RenewBookForm(initial={'renewal_date': proposed_renewal_date})
@@ -129,3 +121,30 @@ def renew_book_librarian(request, pk):
     }
 
     return render(request, 'catalog/book_renew_librarian.html', context)
+
+def borrow_book_instance(request, pk):
+    # This method functions almost exactly like the renew method. Explanations for the different parts are described in the renew method
+    book_instance = get_object_or_404(BookInstance, pk=pk)
+
+    if request.method == 'POST':
+
+        form = BorrowBookForm(request.POST)
+
+        if form.is_valid():
+            book_instance.due_back = form.cleaned_data['borrow_date']
+            book_instance.borrower = request.user
+            book_instance.status = 'o'
+            book_instance.save()
+
+            return HttpResponseRedirect(reverse('borrowed-books') )
+
+    else:
+        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
+        form = RenewBookForm(initial={'renewal_date': proposed_renewal_date})
+
+    context = {
+        'form': form,
+        'book_instance': book_instance,
+    }
+
+    return render(request, 'catalog/borrow_book.html', context)

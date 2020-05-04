@@ -1,4 +1,5 @@
 import uuid
+
 from datetime import date
 from django.db import models
 from django.urls import reverse
@@ -48,7 +49,6 @@ from django.contrib.auth.models import User, BaseUserManager, AbstractBaseUser
 # 		"Is the user active?"
 # 		return self.active
 
-# Create your models here.
 class UserIDNumber(models.Model):
 	id_number = models.IntegerField(null = True, blank = True)
 	user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
