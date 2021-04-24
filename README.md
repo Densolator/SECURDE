@@ -13,3 +13,5 @@ To compile and start web development server:
 - -python manage.py make migrations
 - -python manage.py migrate
 - -python manage.py runserver
+
+After compilation a link will be given for the development server on the bottom.
