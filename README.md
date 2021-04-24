@@ -7,3 +7,9 @@ Requirements:
 - A web browser
 
 NOTE: The web application may or may not come with entries on the database. If it does not, you will have to add them manually.
+
+To compile and start web development server:
+- Go to root page with manage.py on cmd
+- -python manage.py make migrations
+- -python manage.py migrate
+- -python manage.py runserver
